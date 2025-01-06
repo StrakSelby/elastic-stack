@@ -11,6 +11,10 @@ volumes:
     driver: local
   logstashdata01:
     driver: local
+  python:
+    driver: local
+  nodejs:
+    driver: local
 
 # Create networks
 networks:
@@ -80,8 +84,9 @@ services:
       - ELASTIC_HOSTS=http://es01:9200  
       - KIBANA_HOSTS=http://kibana:5601
       - LOGSTASH_HOSTS=http://logstash01:9600
-    command:
-      - --strict.perms=false
+    restart: always
+    # command:
+    #   - --strict.perms=false
   filebeat01:
     image: docker.elastic.co/beats/filebeat:${STACK_VERSION}
     user: root
@@ -97,8 +102,8 @@ services:
       - ELASTIC_HOSTS=http://es01:9200  
       - KIBANA_HOSTS=http://kibana:5601
       - LOGSTASH_HOSTS=http://logstash01:9600
-    command:
-      - --strict.perms=false
+    # command:
+    #   - --strict.perms=false
   logstash01:
     image: docker.elastic.co/logstash/logstash:${STACK_VERSION}
     labels:
@@ -113,39 +118,46 @@ services:
       - ELASTIC_USER=elastic
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - ELASTIC_HOSTS=http://es01:9200 
-  api:
-    # image: node:22-alpine
-    container_name: node-js
-    build: ./dockerfile-node
+  vuejs:
+    container_name: vuejs-node
+    build:
+      context: .
+      dockerfile: Dockerfile-vuejs
     ports:
-      - 3000:3000
+      - "8081"
+      - "8080" 
     environment:
-     - NODE_ENV=local
-     - ES_HOST=elasticsearch
-     - NODE_PORT=3000
-     - ELASTIC_URL=http://elasticsearch:9200
-    volumes:
-      - .:/usr/src/app/quotes
-    command: [npm run start]
+      - NODE_ENV=local
+      - ES_HOST=elasticsearch
+      - NODE_PORT=8080  
+      - ELASTIC_URL=http://es01:9200
+    # volumes:
+    #   - ./frontend/:/usr/src/app/frontend
+    command: ["npm", "run", "serve"]  
     links:
-        - elasticsearch
+      - es01
     depends_on:
-        - es01
-    networks: 
+      - es01
+    networks:
       - default
   python-app:
-    build: ./dockerfile-python
+    build:
+      context: .
+      dockerfile: Dockerfile-python
     depends_on:
       - es01
     container_name: python-app
-    volumes:
-      - ./backend:/app
+    # bind mount
+    # volumes:
+    #   - ./backend/:/app/backend/
     networks:
       - default
     ports:
-      - "5000:5000"
+      - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
-    # restart: always
-    # command: [python /app/python/main.py]
+      - PYTHONPATH=/app
+    restart: always
+    command: ["fastapi","dev", "main.py"]
+
     

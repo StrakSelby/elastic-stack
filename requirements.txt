@@ -1,3 +1,5 @@
 elasticsearch
 fastapi
 tqdm
+torch
+sentence_transformers

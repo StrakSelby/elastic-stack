@@ -10,8 +10,8 @@ def get_es_client(max_entries: int = 1, sleep_time: int = 0) -> Elasticsearch:
     i = 0
     while i < max_entries:
         try:
-            es = Elasticsearch('http://localhost:9200')
-            # es = Elasticsearch('http://es01:9200')
+            # es = Elasticsearch('http://localhost:9200')
+            es = Elasticsearch('http://es01:9200')
             pprint('Connected to Elasticsearch cluster')
             return es
         except Exception as e:

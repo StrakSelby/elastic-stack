@@ -12,7 +12,7 @@ def index_data(documents: List[dict], use_n_gram_tokenizer: bool) -> None:
     _ = _insert_documents(es=es, documents=documents, use_n_gram_tokenizer=use_n_gram_tokenizer )
     
     index_name = INDEX_NAME_N_GRAM if use_n_gram_tokenizer else INDEX_NAME_DEFAULT
-    pprint(f'Indexed {len(documents)} documents into Elasticsearch index "{index_data}"')
+    pprint(f'Indexed {len(documents)} documents into Elasticsearch index "{index_name}"')
     
 def _create_index(es: Elasticsearch, use_n_gram_tokenizer: bool) -> dict:
     tokenizer = 'n_gram_tokenizer' if use_n_gram_tokenizer else 'standard'
